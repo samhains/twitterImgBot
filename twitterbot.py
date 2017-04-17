@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sqlite3
 from settings import config
 from bot import status
 from bot import requests
@@ -30,11 +31,17 @@ def handle_tweet_posting(text, reply_id, test=False):
     reply_id = the id of the tweet we'll be replying to,
     test = if bot was executed with test flag or not.
     """
+
+    conn = sqlite3.connect('/tmp/test.db')
+    c = conn.cursor()
     log = config.log_file
     tolerance = config.tolerance
     banned_list = config.banned_file
     media, amount_media_available = get_random_image_from_folder(config.source_folder)
-
+    media_id = media.split('/')[-1].split('.')[0]
+    q ="SELECT caption FROM IMAGE WHERE uuid='{}'".format(media_id)
+    c.execute(q)
+    text = c.fetchone()[0]
     t = status.Tweet(media, text, reply_id)
 
     tolerance = 0

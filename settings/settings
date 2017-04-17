@@ -6,10 +6,10 @@ secret_key = zGuWZYKiAYv7jv9E2jqlckSekruBFnsWkvThktNxVsJaZKpqb8
 token =	853308331942871041-S2Q3tF1eFDMGNe7O6xz1WfuyeEixc0I
 secret_token = ZQABIYgzshejERbi0Gp44eOQyo3vZEAWoNvlVcC436wHe
 [App]
-image_folder = /home/ubuntu/data/images
+image_folder = /Users/samhains/data/images
 execution_chance = 1
 allow_repeat_after = 50
-log_file = /home/ubuntu/Code/twitterImgBot/log
+log_file = /Users/samhains/Code/twitterImgBot/log
 bot_account = @zero_likes
 master_account = @sam_hains
 dont_tweet_file = 
