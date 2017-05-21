@@ -37,12 +37,10 @@ def handle_tweet_posting(text, reply_id, test=False):
     log = config.log_file
     tolerance = config.tolerance
     banned_list = config.banned_file
-    media, amount_media_available = get_random_image_from_folder(config.source_folder)
-    media_id = media.split('/')[-1].split('.')[0]
-    q ="SELECT caption FROM IMAGE WHERE uuid='{}'".format(media_id)
-    c.execute(q)
-    text = c.fetchone()[0]
-    t = status.Tweet(media, text, reply_id)
+    #media, amount_media_available = get_random_image_from_folder(config.source_folder)
+    url, caption = get_random_image_from_sql(c, test)
+    #t = status.Tweet(media, "", 0)
+    t = status.Tweet(url, caption)
 
     tolerance = 0
     while t.is_already_tweeted(log, tolerance) or t.is_banned(banned_list):
@@ -56,12 +54,26 @@ def handle_tweet_posting(text, reply_id, test=False):
         tweet_id = t.post_to_twitter(api)
         log_line = logger.log_line(post_number, tweet_id, media, reply_id)
 
-    else:
         # if it was a test, don't post it and mark the log line as such
-        log_line = logger.log_line(post_number, 'TEST_ID', "TEST_PATH", reply_id)
+        #log_line = logger.log_line("0", 'TEST_ID', "TEST_PATH", reply_id)
 
-    logger.add_line_to_log(log_line, log)
+    #logger.add_line_to_log(log_line, log)
     return True
+
+def get_random_image_from_sql(c, test):
+    """Returns a random file from folder and the amount of files in the folder.
+    It's up the user to check (or not) if the return file is actually an
+    image.
+    """
+    q = "SELECT url,caption,uuid FROM Image WHERE number == 0 ORDER BY RANDOM()"
+    c.execute(q)
+    url, caption, uuid = c.fetchone()
+    url = '/home/ubuntu/data/images/'+url.split('/')[-1]	
+    print("tweeting:", uuid, caption)
+    if not test:
+        q = "UPDATE Image SET number = 1 WHERE uuid == '{}'".format(uuid)
+        c.execute(q) 
+    return url, caption
 
 
 def get_random_image_from_folder(folder):
@@ -108,9 +120,9 @@ def orders():
     master_account = config.master_account
     mentions = requests.mentions(config.bot_account, api)
 
-    mentions = requests.mentions(config.bot_account, config.api)
-    master_mentions = requests.master_mentions(mentions, log, master_account)
-    relevant_mentions = requests.relevant_mentions(mentions, log, time)
+    #mentions = requests.mentions(config.bot_account, config.api)
+    #master_mentions = requests.master_mentions(mentions, log, master_account)
+    #relevant_mentions = requests.relevant_mentions(mentions, log, time)
 
     for tweet in relevant_mentions:
         if requests.is_img_request(tweet, config.request_command):
@@ -201,10 +213,10 @@ def main():
     tweet_raw_text = config.tweet_this_text
     tweet_post_number = config.tweet_post_number
 
-    post_number = get_post_number(manual_post_number)
-    tweet_text = create_tweet_text(tweet_raw_text, post_number, tweet_post_number)
+    #post_number = get_post_number(manual_post_number)
+    tweet_text = create_tweet_text(tweet_raw_text, 0, tweet_post_number)
 
-    orders()
+    #orders()
 
     if random.randint(0, 99) < config.chance or test or forceTweet:
         tweeted_successfully = handle_tweet_posting(tweet_text, None, test)
