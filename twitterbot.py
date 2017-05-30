@@ -61,18 +61,20 @@ def handle_tweet_posting(text, reply_id, test=False):
 
 def get_random_algo():
     prob = random.random()
-    if (prob < 0.28):
+    if (prob < 0.24):
         return 'v1_dcgan'
-    elif (prob < 0.56):
+    elif (prob < 0.48):
         return 'v3_dcgan'
     else:
         return 'v3_p2p'
 
 def get_random_caption(cap1, cap2):
     prob = random.random()
-    if (prob < 0.6):
+    if (prob < 0.75):
+        print('oldcap')
         return cap1
     else:
+        print('newcap')
         return cap2
 
 def get_random_image_from_sql(test):
@@ -89,8 +91,7 @@ def get_random_image_from_sql(test):
     print('querying', q)
     url, caption, caption_im2txt, uuid = c.fetchone()
     print('gettin sum', url, caption, caption_im2txt)
-    #caption = get_random_caption(caption, caption_im2txt)
-    caption = caption_im2txt
+    caption = get_random_caption(caption, caption_im2txt)
     url = '/home/ubuntu/data/images/'+url.split('/')[-1]	
     print("tweeting:", uuid, caption, "test:", test)
     if not test:
@@ -146,9 +147,6 @@ def orders():
     master_account = config.master_account
     mentions = requests.mentions(config.bot_account, api)
 
-    #mentions = requests.mentions(config.bot_account, config.api)
-    #master_mentions = requests.master_mentions(mentions, log, master_account)
-    #relevant_mentions = requests.relevant_mentions(mentions, log, time)
 
     for tweet in relevant_mentions:
         if requests.is_img_request(tweet, config.request_command):
@@ -239,7 +237,6 @@ def main():
     tweet_raw_text = config.tweet_this_text
     tweet_post_number = config.tweet_post_number
 
-    #post_number = get_post_number(manual_post_number)
     tweet_text = create_tweet_text(tweet_raw_text, 0, tweet_post_number)
 
     #orders()
