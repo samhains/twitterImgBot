@@ -61,9 +61,9 @@ def handle_tweet_posting(text, reply_id, test=False):
 
 def get_random_algo():
     prob = random.random()
-    if (prob < 0.24):
+    if (prob < 0.15):
         return 'v1_dcgan'
-    elif (prob < 0.48):
+    elif (prob < 0.44):
         return 'v3_dcgan'
     else:
         return 'v3_p2p'
