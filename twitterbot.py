@@ -32,13 +32,12 @@ def handle_tweet_posting(text, reply_id, test=False):
     test = if bot was executed with test flag or not.
     """
 
-    conn = sqlite3.connect('/tmp/test.db')
-    c = conn.cursor()
     log = config.log_file
     tolerance = config.tolerance
     banned_list = config.banned_file
     #media, amount_media_available = get_random_image_from_folder(config.source_folder)
-    url, caption = get_random_image_from_sql(c, test)
+    url, caption = get_random_image_from_sql(test)
+    print(caption)
     #t = status.Tweet(media, "", 0)
     t = status.Tweet(url, caption)
 
@@ -52,7 +51,7 @@ def handle_tweet_posting(text, reply_id, test=False):
 
     if not test:
         tweet_id = t.post_to_twitter(api)
-        log_line = logger.log_line(post_number, tweet_id, media, reply_id)
+        #log_line = logger.log_line(tweet_id, media, reply_id)
 
         # if it was a test, don't post it and mark the log line as such
         #log_line = logger.log_line("0", 'TEST_ID', "TEST_PATH", reply_id)
@@ -60,19 +59,46 @@ def handle_tweet_posting(text, reply_id, test=False):
     #logger.add_line_to_log(log_line, log)
     return True
 
-def get_random_image_from_sql(c, test):
+def get_random_algo():
+    prob = random.random()
+    if (prob < 0.28):
+        return 'v1_dcgan'
+    elif (prob < 0.56):
+        return 'v3_dcgan'
+    else:
+        return 'v3_p2p'
+
+def get_random_caption(cap1, cap2):
+    prob = random.random()
+    if (prob < 0.6):
+        return cap1
+    else:
+        return cap2
+
+def get_random_image_from_sql(test):
     """Returns a random file from folder and the amount of files in the folder.
     It's up the user to check (or not) if the return file is actually an
     image.
     """
-    q = "SELECT url,caption,uuid FROM Image WHERE number == 0 ORDER BY RANDOM()"
+
+    conn = sqlite3.connect('/tmp/test.db')
+    c = conn.cursor()
+    algo = get_random_algo()
+    q = "SELECT url,caption,caption_im2txt,uuid FROM Image WHERE number == 0 AND algo == '{}' ORDER BY RANDOM()".format(algo)
     c.execute(q)
-    url, caption, uuid = c.fetchone()
+    print('querying', q)
+    url, caption, caption_im2txt, uuid = c.fetchone()
+    print('gettin sum', url, caption, caption_im2txt)
+    #caption = get_random_caption(caption, caption_im2txt)
+    caption = caption_im2txt
     url = '/home/ubuntu/data/images/'+url.split('/')[-1]	
-    print("tweeting:", uuid, caption)
+    print("tweeting:", uuid, caption, "test:", test)
     if not test:
+        print("Updating image number to 1 with uuid:", uuid)
         q = "UPDATE Image SET number = 1 WHERE uuid == '{}'".format(uuid)
         c.execute(q) 
+        conn.commit()
+    conn.close()
     return url, caption
 
 
