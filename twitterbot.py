@@ -61,16 +61,18 @@ def handle_tweet_posting(text, reply_id, test=False):
 
 def get_random_algo():
     prob = random.random()
-    if (prob < 0.15):
+    if (prob < 0.12):
         return 'v1_dcgan'
-    elif (prob < 0.44):
+    elif (prob < 0.34):
         return 'v3_dcgan'
+    elif (prop < 0.88):
+        return 'v2_p2p_curated'
     else:
         return 'v3_p2p'
 
 def get_random_caption(cap1, cap2):
     prob = random.random()
-    if (prob < 0.75):
+    if (prob < 0.62):
         print('oldcap')
         return cap1
     else:
